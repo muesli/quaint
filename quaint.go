@@ -154,7 +154,7 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	rtr := mux.NewRouter()
-	rtr.HandleFunc("/{text:[^s]+}.png", serveImage).Methods("GET")
+	rtr.HandleFunc("/{text:[[:graph:]]+}.png", serveImage).Methods("GET")
 
 	http.Handle("/", rtr)
 
