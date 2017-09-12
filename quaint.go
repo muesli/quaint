@@ -19,6 +19,7 @@ import (
 
 const (
 	maxSize         = 4000
+	defaultSize     = 512
 	backgroundImage = "/tmp/bg.jpg"
 	ttf             = "/usr/share/fonts/TTF/Roboto-Bold.ttf"
 	defaultFg       = "#969696"
@@ -69,9 +70,12 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	r.ParseForm()
 
-	text := r.FormValue("text")
-	width, _ := strconv.ParseInt(params["width"], 10, 32)
-	height, _ := strconv.ParseInt(params["height"], 10, 32)
+	text := params["text"]
+	width, _ := strconv.ParseInt(r.FormValue("width"), 10, 32)
+	height, _ := strconv.ParseInt(r.FormValue("height"), 10, 32)
+	if width == 0 && height == 0 {
+		width = defaultSize
+	}
 
 	if width > maxSize || height > maxSize {
 		http.Error(w, "Image too large", http.StatusRequestEntityTooLarge)
@@ -150,8 +154,7 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	rtr := mux.NewRouter()
-	rtr.HandleFunc("/{width:[0-9]+}x{height:[0-9]+}.png", serveImage).Methods("GET")
-	rtr.HandleFunc("/{width:[0-9]+}.png", serveImage).Methods("GET")
+	rtr.HandleFunc("/{text:[^s]+}.png", serveImage).Methods("GET")
 
 	http.Handle("/", rtr)
 
